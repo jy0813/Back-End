@@ -4,8 +4,8 @@
   "description": "express 연습",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js",
-    "dev": "nodemon app.j"
+    "start": "npx nodemon app.js",
+    "dev": "npx nodemon app.j"
   },
   "keywords": [],
   "author": "진재윤",
