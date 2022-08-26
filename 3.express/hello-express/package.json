@@ -4,13 +4,14 @@
   "description": "express 연습",
   "main": "index.js",
   "scripts": {
-    "start": "npx nodemon app.js",
+    "start": "npx nodemon -e js, html app.js",
     "dev": "npx nodemon app.j"
   },
   "keywords": [],
   "author": "진재윤",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "nunjucks": "^3.2.3"
   }
 }
