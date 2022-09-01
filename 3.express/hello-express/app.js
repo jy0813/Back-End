@@ -21,6 +21,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/uploads", express.static("uploads"));
 
+app.use((req, res, next) => {
+  app.locals.isLogin = true;
+  next();
+});
+
 app.get("/", (request, response) => {
   response.send("hello express");
 });
@@ -35,6 +40,14 @@ app.use("/contacts", contacts);
 
 app.get("/jjy", (request, response) => {
   response.send("hello jjy get");
+});
+
+app.use((req, res, next) => {
+  res.status(400).render("common/404.html");
+});
+
+app.use((req, res, next) => {
+  res.status(500).render("common/500.html");
 });
 
 app.listen(port, () => {
