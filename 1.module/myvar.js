@@ -1,4 +1,5 @@
 const a = "hello a";
+
 function Myvar() {
   this.name = "my instance";
   this.hello = "hello";
