@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const axios = require("axios");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
@@ -83,4 +84,8 @@ app.get("/list", (요청, 응답) => {
       console.log(결과);
       응답.render("list.ejs", { 데이터들: 결과 });
     });
+});
+
+app.delete("/delete", (요청, 응답) => {
+  console.log(요청.body);
 });

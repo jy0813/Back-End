@@ -50,12 +50,17 @@
       </div>
     </nav>
 
-    <h2>서버에서 가져온 할일 리스트</h2>
+    <h4 class="ml-2 my-3">서버에서 가져온 할일 리스트</h4>
 
-    <% for (let i = 0; i < 데이터들.length; i++) { %>
-    <h4>할일 : <%= 데이터들[i].할일 %></h4>
-    <p>날짜 : <%= 데이터들[i].날짜 %></p>
-    <% } %>
+    <ul class="list-group">
+      <% for (let i = 0; i < 데이터들.length; i++) { %>
+      <li class="list-group-item">
+        <h4>할일 : <%= 데이터들[i].할일 %></h4>
+        <p>날짜 : <%= 데이터들[i].날짜 %></p>
+        <button>삭제</button>
+      </li>
+      <% } %>
+    </ul>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
