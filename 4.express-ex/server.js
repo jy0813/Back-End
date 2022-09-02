@@ -15,12 +15,12 @@ MongoClient.connect(
     }
 
     db = client.db("todo");
-    db.collection("test").insertOne(
-      { 할일: "퇴근", 날짜: 2022 - 09 - 01, _id: 0 },
-      (에러, 결과) => {
-        console.log("저장완료");
-      }
-    );
+    // db.collection("test").insertOne(
+    //   { _id: 0, 할일: "퇴근", 날짜: 2022 - 09 - 01 },
+    //   (에러, 결과) => {
+    //     console.log("저장완료");
+    //   }
+    // );
 
     app.listen(5000, () => {
       console.log("listening on 5000");
@@ -47,13 +47,27 @@ app.get("/write", (요청, 응답) => {
 //3. 요청.body라 하면 요청햇던 form에 적힌 데이터 수신 가능
 
 app.post("/add", (요청, 응답) => {
-  응답.send("전송완료");
-  db.collection("test").insertOne(
-    { 할일: 요청.body.title, 날짜: 요청.body.date, _id: 3 },
-    (에러, 결과) => {
-      console.log("저장완료");
-    }
-  );
+  응답.sendFile(__dirname + "/write.html");
+  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
+    console.log(결과.totalPost);
+    let 총게시물갯수 = 결과.totalPost;
+    db.collection("test").insertOne(
+      { 할일: 요청.body.title, 날짜: 요청.body.date, _id: 총게시물갯수 + 1 },
+      (에러, 결과) => {
+        console.log("저장완료");
+        //counter 라는 콜렉션에 있는 totalpost 라는 항목도 1 증가 시켜야함;
+        db.collection("counter").updateOne(
+          { name: "게시물갯수" },
+          { $inc: { totalPost: 1 } },
+          (에러, 결과) => {
+            if (에러) {
+              return console.log(에러 + 입니다);
+            }
+          }
+        );
+      }
+    );
+  });
 });
 
 /**
