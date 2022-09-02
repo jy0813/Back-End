@@ -94,3 +94,11 @@ app.delete("/delete", (요청, 응답) => {
     응답.status(200).send({ message: "성공했습니다." });
   });
 });
+
+app.get("/detail/:id", (요청, 응답) => {
+  요청.params.id = parseInt(요청.params.id);
+  db.collection("test").findOne({ _id: 요청.params.id }, (에러, 결과) => {
+    console.log(결과);
+    응답.render("detail.ejs", { data: 결과 });
+  });
+});
