@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const axios = require("axios");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
@@ -10,6 +9,7 @@ let db;
 const MongoClient = require("mongodb").MongoClient;
 MongoClient.connect(
   "mongodb+srv://admin:qazqaz123!@cluster0.avjmzuj.mongodb.net/?retryWrites=true&w=majority",
+  { useUnifiedTopology: true },
   (에러, client) => {
     if (에러) {
       return console.log(에러);
@@ -88,4 +88,9 @@ app.get("/list", (요청, 응답) => {
 
 app.delete("/delete", (요청, 응답) => {
   console.log(요청.body);
+  요청.body._id = parseInt(요청.body._id);
+  db.collection("test").deleteOne(요청.body, (에러, 결과) => {
+    console.log("삭제완료");
+    응답.status(200).send({ message: "성공했습니다." });
+  });
 });
