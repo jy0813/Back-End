@@ -67,13 +67,19 @@
     <script>
       $(".delete").click(function (e) {
         var num = e.target.dataset.id;
+        var 지금누른거 = $(this);
         $.ajax({
           method: "DELETE",
           url: "/delete",
           data: { _id: num },
-        }).done(function (결과) {
-          location.reload();
-        });
+        })
+          .done(function (결과) {
+            지금누른거.parent("li").fadeOut();
+            console.log("성공했습니다.");
+          })
+          .fail(function (xhr, textStatus, errorThrown) {
+            console.log(xhr, textStatus, errorThrown);
+          });
       });
     </script>
 
