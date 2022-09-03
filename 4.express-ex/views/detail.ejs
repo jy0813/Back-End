@@ -19,41 +19,17 @@
     <title>Hello, world!</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">Navbar</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="#"
-              >Home <span class="sr-only">(current)</span></a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">write</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">임시</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
+    <%- include('nav.html') %>
 
     <h4>상세페이지</h4>
 
-    <h4>할일: <%= data.할일 %></h4>
-    <h4>날짜: <%= data.날짜 %></h4>
+    <div class="card" style="width: 100%">
+      <div class="card-body">
+        <h4 class="card-title">할일: <%= data.할일 %></h4>
+        <h5 class="card-subtitle mb-2 text-muted">날짜: <%= data.날짜 %></h5>
+        <a class="card-link" href="">수정하기</a>
+      </div>
+    </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

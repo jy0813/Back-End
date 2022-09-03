@@ -31,12 +31,12 @@ MongoClient.connect(
 
 app.get("/", (요청, 응답) => {
   // __dirname은 현재 파일의 경로를 뜻합니다.
-  응답.sendFile(__dirname + "/index.html");
+  응답.render("index.ejs");
 });
 
 app.get("/write", (요청, 응답) => {
   // __dirname은 현재 파일의 경로를 뜻합니다.
-  응답.sendFile(__dirname + "/write.html");
+  응답.render("write.ejs");
 });
 
 //input에 정보는 어딨나???
@@ -101,4 +101,8 @@ app.get("/detail/:id", (요청, 응답) => {
     console.log(결과);
     응답.render("detail.ejs", { data: 결과 });
   });
+});
+
+app.get("/edit", (요청, 응답) => {
+  응답.render("edit.ejs");
 });
