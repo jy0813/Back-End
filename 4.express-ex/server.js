@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const methodOverride = require("method-override");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-
+app.use(methodOverride("_method"));
 let db;
 
 const MongoClient = require("mongodb").MongoClient;
