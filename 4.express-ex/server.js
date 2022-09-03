@@ -103,6 +103,10 @@ app.get("/detail/:id", (요청, 응답) => {
   });
 });
 
-app.get("/edit", (요청, 응답) => {
-  응답.render("edit.ejs");
+app.get("/edit/:id", (요청, 응답) => {
+  요청.params.id = parseInt(요청.params.id);
+  db.collection("test").findOne({ _id: 요청.params.id }, (에러, 결과) => {
+    console.log(결과);
+    응답.render("edit.ejs", { edit: 결과 });
+  });
 });
