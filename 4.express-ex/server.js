@@ -184,7 +184,22 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// 로그인 시 마이페이지로 접속시
+// 로그인 시 개인정보를 db에서 찾는 역할
 passport.deserializeUser((아이디, done) => {
-  done(null, {});
+  db.collection("login").findOne({ id: 아이디 }, (에러, 결과) => {
+    done(null, 결과);
+  });
+});
+
+function loginCheck(요청, 응답, next) {
+  if (요청.user) {
+    next();
+  } else {
+    응답.send("로그인 안됨");
+  }
+}
+
+app.get("/mypage", loginCheck, (요청, 응답) => {
+  console.log(요청.user);
+  응답.render("mypage.ejs", { 사용자: 요청.user });
 });
