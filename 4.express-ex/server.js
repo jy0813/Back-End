@@ -178,3 +178,13 @@ passport.use(
     }
   )
 );
+
+// 로그인 성공시 발동
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// 로그인 시 마이페이지로 접속시
+passport.deserializeUser((아이디, done) => {
+  done(null, {});
+});
