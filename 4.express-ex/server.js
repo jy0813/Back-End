@@ -111,3 +111,14 @@ app.get("/edit/:id", (요청, 응답) => {
     응답.render("edit.ejs", { edit: 결과 });
   });
 });
+
+app.put("/edit", (요청, 응답) => {
+  db.collection("test").updateOne(
+    { _id: parseInt(요청.body.id) },
+    { $set: { 할일: 요청.body.title, 날짜: 요청.body.date } },
+    (에러, 결과) => {
+      console.log("수정완료");
+      응답.redirect("/list");
+    }
+  );
+});
