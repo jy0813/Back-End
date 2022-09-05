@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
+require("dotenv").config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
@@ -9,7 +10,7 @@ let db;
 
 const MongoClient = require("mongodb").MongoClient;
 MongoClient.connect(
-  "mongodb+srv://admin:qazqaz123!@cluster0.avjmzuj.mongodb.net/?retryWrites=true&w=majority",
+  process.env.DB_URL,
   { useUnifiedTopology: true },
   (에러, client) => {
     if (에러) {
@@ -24,7 +25,7 @@ MongoClient.connect(
     //   }
     // );
 
-    app.listen(5000, () => {
+    app.listen(process.env.DB_URL, () => {
       console.log("listening on 5000");
     });
   }
