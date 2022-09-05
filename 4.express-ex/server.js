@@ -220,3 +220,13 @@ app.get("/mypage", loginCheck, (요청, 응답) => {
   console.log(요청.user);
   응답.render("mypage.ejs", { 사용자: 요청.user });
 });
+
+app.get("/search", (요청, 응답) => {
+  console.log(요청.query.value);
+  db.collection("test")
+    .find({ 할일: 요청.query.value })
+    .toArray((에러, 결과) => {
+      console.log(결과);
+      응답.render("search.ejs", { 데이터들: 결과 });
+    });
+});
