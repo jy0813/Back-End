@@ -25,7 +25,7 @@ MongoClient.connect(
     //   }
     // );
 
-    app.listen(process.env.DB_URL, () => {
+    app.listen(process.env.PORT, () => {
       console.log("listening on 5000");
     });
   }
@@ -50,7 +50,7 @@ app.get("/write", (요청, 응답) => {
 //3. 요청.body라 하면 요청햇던 form에 적힌 데이터 수신 가능
 
 app.post("/add", (요청, 응답) => {
-  응답.sendFile(__dirname + "/write.html");
+  응답.render("write.ejs");
   db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
     console.log(결과.totalPost);
     let 총게시물갯수 = 결과.totalPost;
@@ -91,9 +91,25 @@ app.get("/list", (요청, 응답) => {
 app.delete("/delete", (요청, 응답) => {
   console.log(요청.body);
   요청.body._id = parseInt(요청.body._id);
-  db.collection("test").deleteOne(요청.body, (에러, 결과) => {
-    console.log("삭제완료");
-    응답.status(200).send({ message: "성공했습니다." });
+  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
+    let 총게시물갯수 = 결과.totalPost;
+    db.collection("test").deleteOne(
+      요청.body,
+      총게시물갯수 - 1,
+      (에러, 결과) => {
+        console.log("삭제완료");
+        응답.status(200).send({ message: "성공했습니다" });
+        db.collection("counter").updateOne(
+          { name: "게시물갯수" },
+          { $inc: { totalPost: -1 } },
+          (에러, 결과) => {
+            if (에러) {
+              return console.log(에러 + 입니다);
+            }
+          }
+        );
+      }
+    );
   });
 });
 
