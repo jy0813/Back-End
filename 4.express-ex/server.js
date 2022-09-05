@@ -93,23 +93,19 @@ app.delete("/delete", (요청, 응답) => {
   요청.body._id = parseInt(요청.body._id);
   db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
     let 총게시물갯수 = 결과.totalPost;
-    db.collection("test").deleteOne(
-      요청.body,
-      총게시물갯수 - 1,
-      (에러, 결과) => {
-        console.log("삭제완료");
-        응답.status(200).send({ message: "성공했습니다" });
-        db.collection("counter").updateOne(
-          { name: "게시물갯수" },
-          { $inc: { totalPost: -1 } },
-          (에러, 결과) => {
-            if (에러) {
-              return console.log(에러 + 입니다);
-            }
+    db.collection("test").deleteOne(요청.body, (에러, 결과) => {
+      console.log("삭제완료");
+      응답.status(200).send({ message: "성공했습니다" });
+      db.collection("counter").updateOne(
+        { name: "게시물갯수" },
+        { $inc: { totalPost: -1 } },
+        (에러, 결과) => {
+          if (에러) {
+            return console.log(에러 + 입니다);
           }
-        );
-      }
-    );
+        }
+      );
+    });
   });
 });
 
@@ -224,7 +220,17 @@ app.get("/mypage", loginCheck, (요청, 응답) => {
 app.get("/search", (요청, 응답) => {
   console.log(요청.query.value);
   db.collection("test")
-    .find({ 할일: 요청.query.value })
+    .aggregate([
+      {
+        $search: {
+          index: "titleSearch",
+          text: {
+            query: 요청.query.value,
+            path: "할일",
+          },
+        },
+      },
+    ])
     .toArray((에러, 결과) => {
       console.log(결과);
       응답.render("search.ejs", { 데이터들: 결과 });
