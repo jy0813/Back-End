@@ -200,6 +200,24 @@ app.post("/register", (요청, 응답) => {
   );
 });
 
+app.post("/message", loginCheck, (요청, 응답) => {
+  let 저장할거 = {
+    parent: 요청.body.parent,
+    content: 요청.body.content,
+    userid: 요청.user._id,
+    date: new Date(),
+  };
+  db.collection("message")
+    .insertOne(저장할거)
+    .then(() => {
+      console.log("db저장성공");
+      응답.send("db저장성공");
+    })
+    .catch(() => {
+      console.log("실패");
+    });
+});
+
 app.post("/add", (요청, 응답) => {
   요청.user._id;
   응답.render("write.ejs");

@@ -50,7 +50,7 @@
         <div class="col-3">
           <ul class="list-group chat-list">
             <% for (let i = 0; i < data.length; i++){ %>
-            <li class="list-group-item" data-id="">
+            <li class="list-group-item" data-id="<%= data[i]._id %>">
               <h6><%= data[i].title %></h6>
               <h6 class="text-small"><%= data[i].member[0] %></h6>
             </li>
@@ -75,7 +75,24 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+      let 지금누른채팅방id;
+      $(".list-group-item").click(function () {
+        $(this).css("background-color", "#eee");
+        지금누른채팅방id = this.dataset.id;
+      });
 
+      $("#send").click(function () {
+        let 채팅내용 = $("#chat-input").val();
+        let 보낼거 = {
+          parent: 지금누른채팅방id,
+          content: 채팅내용,
+        };
+        $.post("/message", 보낼거).then(() => {
+          console.log(전송성공);
+        });
+      });
+    </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 
