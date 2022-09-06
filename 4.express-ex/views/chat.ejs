@@ -77,9 +77,15 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script>
       let 지금누른채팅방id;
+      let eventSource;
       $(".list-group-item").click(function () {
         $(this).css("background-color", "#eee");
         지금누른채팅방id = this.dataset.id;
+
+        eventSource = new EventSource("/message/" + 지금누른채팅방id);
+        eventSource.addEventListener("test", (e) => {
+          console.log(e.data);
+        });
       });
 
       $("#send").click(function () {

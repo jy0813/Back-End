@@ -218,6 +218,21 @@ app.post("/message", loginCheck, (요청, 응답) => {
     });
 });
 
+app.get("/message/:parentid", loginCheck, function (요청, 응답) {
+  응답.writeHead(200, {
+    Connection: "keep-alive",
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+  });
+  db.collection("message")
+    .find({ parent: 요청.params.id })
+    .toArray()
+    .then((결과) => {
+      응답.write("event: test\n");
+      응답.write(`data: ${JSON.stringify(결과)} + \n\n`);
+    });
+});
+
 app.post("/add", (요청, 응답) => {
   요청.user._id;
   응답.render("write.ejs");
