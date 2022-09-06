@@ -49,30 +49,6 @@ app.get("/write", (요청, 응답) => {
 //2. form 데이터의 경우 input들에 name이 필요함
 //3. 요청.body라 하면 요청햇던 form에 적힌 데이터 수신 가능
 
-app.post("/add", (요청, 응답) => {
-  응답.render("write.ejs");
-  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
-    console.log(결과.totalPost);
-    let 총게시물갯수 = 결과.totalPost;
-    db.collection("test").insertOne(
-      { 할일: 요청.body.title, 날짜: 요청.body.date, _id: 총게시물갯수 + 1 },
-      (에러, 결과) => {
-        console.log("저장완료");
-        //counter 라는 콜렉션에 있는 totalpost 라는 항목도 1 증가 시켜야함;
-        db.collection("counter").updateOne(
-          { name: "게시물갯수" },
-          { $inc: { totalPost: 1 } },
-          (에러, 결과) => {
-            if (에러) {
-              return console.log(에러 + 입니다);
-            }
-          }
-        );
-      }
-    );
-  });
-});
-
 /**
  * list 로 GET 요청으로 접속하면
  * 실제 Db에 저장된 데이터들이 들어이는 HTML을 보여줌
@@ -86,27 +62,6 @@ app.get("/list", (요청, 응답) => {
       console.log(결과);
       응답.render("list.ejs", { 데이터들: 결과 });
     });
-});
-
-app.delete("/delete", (요청, 응답) => {
-  console.log(요청.body);
-  요청.body._id = parseInt(요청.body._id);
-  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
-    let 총게시물갯수 = 결과.totalPost;
-    db.collection("test").deleteOne(요청.body, (에러, 결과) => {
-      console.log("삭제완료");
-      응답.status(200).send({ message: "성공했습니다" });
-      db.collection("counter").updateOne(
-        { name: "게시물갯수" },
-        { $inc: { totalPost: -1 } },
-        (에러, 결과) => {
-          if (에러) {
-            return console.log(에러 + 입니다);
-          }
-        }
-      );
-    });
-  });
 });
 
 app.get("/detail/:id", (요청, 응답) => {
@@ -211,6 +166,65 @@ function loginCheck(요청, 응답, next) {
     응답.send("로그인 안됨");
   }
 }
+
+app.post("/register", (요청, 응답) => {
+  db.collection("login").insertOne(
+    { id: 요청.body.id, pw: 요청.body.pw },
+    (에러, 결과) => {
+      응답.redirect("/");
+    }
+  );
+});
+
+app.post("/add", (요청, 응답) => {
+  요청.user._id;
+  응답.render("write.ejs");
+  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
+    console.log(결과.totalPost);
+    let 총게시물갯수 = 결과.totalPost;
+    let 저장할거 = {
+      할일: 요청.body.title,
+      날짜: 요청.body.date,
+      _id: 총게시물갯수 + 1,
+      작성자: 요청.user._id,
+    };
+    db.collection("test").insertOne(저장할거, (에러, 결과) => {
+      console.log("저장완료");
+      //counter 라는 콜렉션에 있는 totalpost 라는 항목도 1 증가 시켜야함;
+      db.collection("counter").updateOne(
+        { name: "게시물갯수" },
+        { $inc: { totalPost: 1 } },
+        (에러, 결과) => {
+          if (에러) {
+            return console.log(에러 + 입니다);
+          }
+        }
+      );
+    });
+  });
+});
+
+app.delete("/delete", (요청, 응답) => {
+  console.log("삭제요청 들어옴");
+  console.log(요청.body);
+  요청.body._id = parseInt(요청.body._id);
+  let 삭제할데이터 = { _id: 요청.body._id, 작성자: 요청.user.id };
+  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
+    db.collection("test").deleteOne(삭제할데이터, (에러, 결과) => {
+      console.log("삭제완료");
+      응답.status(200).send({ message: "성공했습니다" });
+      db.collection("counter").updateOne(
+        { name: "게시물갯수" },
+        { $inc: { totalPost: -1 } },
+        (에러, 결과) => {
+          if (에러) {
+            return console.log(에러 + 입니다);
+          }
+        }
+      );
+    });
+  });
+});
 
 app.get("/mypage", loginCheck, (요청, 응답) => {
   console.log(요청.user);
