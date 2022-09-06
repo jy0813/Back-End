@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
+const { ObjectId } = require("mongodb");
 require("dotenv").config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -167,6 +168,29 @@ function loginCheck(요청, 응답, next) {
   }
 }
 
+app.post("/chatroom", loginCheck, (요청, 응답) => {
+  let 저장할거 = {
+    title: "무슨무슨채팅방",
+    member: [ObjectId(요청.body.당한사람id), 요청.user._id],
+    date: new Date(),
+  };
+  db.collection("chatroom")
+    .insertOne(저장할거)
+    .then((결과) => {
+      응답.send("성공");
+    })
+    .catch((error) => {});
+});
+
+app.get("/chat", loginCheck, (요청, 응답) => {
+  db.collection("chatroom")
+    .find({ member: 요청.user._id })
+    .toArray()
+    .then((결과) => {
+      응답.render("chat.ejs", { data: 결과 });
+    });
+});
+
 app.post("/register", (요청, 응답) => {
   db.collection("login").insertOne(
     { id: 요청.body.id, pw: 요청.body.pw },
@@ -263,16 +287,16 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     cb(null, file.originalname);
   },
-  fileFilter: (req, file, callback) => {
-    var ext = path.extname(file.originalname);
-    if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
-      return callback(new Error("PNG, JPG만 업로드하세요"));
-    }
-    callback(null, true);
-  },
-  limits: {
-    fileSize: 1024 * 1024,
-  },
+  // fileFilter: (req, file, callback) => {
+  //   var ext = path.extname(file.originalname);
+  //   if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
+  //     return callback(new Error("PNG, JPG만 업로드하세요"));
+  //   }
+  //   callback(null, true);
+  // },
+  // limits: {
+  //   fileSize: 1024 * 1024,
+  // },
 });
 
 const upload = multer({ storage });
