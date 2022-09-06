@@ -250,3 +250,7 @@ app.get("/search", (요청, 응답) => {
       응답.render("search.ejs", { 데이터들: 결과 });
     });
 });
+
+app.use("/shop", require("./routes/shop.js"));
+
+app.use("/board/sub", require("./routes/bode.js"));
