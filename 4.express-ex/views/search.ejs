@@ -26,12 +26,12 @@
     </div>
 
     <ul class="list-group">
-      <% for (let i = 0; i < 데이터들.length; i++) { %>
+      <% for (let i = 0; i < datas.length; i++) { %>
       <li class="list-group-item">
-        <p>글번호 : <%= 데이터들[i]._id %></p>
-        <h4>할일 : <%= 데이터들[i].할일 %></h4>
-        <p>날짜 : <%= 데이터들[i].날짜 %></p>
-        <button class="btn btn-danger delete" data-id="<%= 데이터들[i]._id %>">
+        <p>글번호 : <%= datas[i]._id %></p>
+        <h4>할일 : <%= datas[i].할일 %></h4>
+        <p>날짜 : <%= datas[i].날짜 %></p>
+        <button class="btn btn-danger delete" data-id="<%= datas[i]._id %>">
           삭제
         </button>
       </li>

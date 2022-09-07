@@ -13,18 +13,12 @@ const MongoClient = require("mongodb").MongoClient;
 MongoClient.connect(
   process.env.DB_URL,
   { useUnifiedTopology: true },
-  (에러, client) => {
-    if (에러) {
-      return console.log(에러);
+  (err, client) => {
+    if (err) {
+      return console.log(err);
     }
 
     db = client.db("todo");
-    // db.collection("test").insertOne(
-    //   { _id: 0, 할일: "퇴근", 날짜: 2022 - 09 - 01 },
-    //   (에러, 결과) => {
-    //     console.log("저장완료");
-    //   }
-    // );
 
     app.listen(process.env.PORT, () => {
       console.log("listening on 5000");
@@ -32,14 +26,14 @@ MongoClient.connect(
   }
 );
 
-app.get("/", (요청, 응답) => {
+app.get("/", (req, res) => {
   // __dirname은 현재 파일의 경로를 뜻합니다.
-  응답.render("index.ejs");
+  res.render("index.ejs");
 });
 
-app.get("/write", (요청, 응답) => {
+app.get("/write", (req, res) => {
   // __dirname은 현재 파일의 경로를 뜻합니다.
-  응답.render("write.ejs");
+  res.render("write.ejs");
 });
 
 //input에 정보는 어딨나???
@@ -48,46 +42,46 @@ app.get("/write", (요청, 응답) => {
 
 //1. body-parser가 필요함
 //2. form 데이터의 경우 input들에 name이 필요함
-//3. 요청.body라 하면 요청햇던 form에 적힌 데이터 수신 가능
+//3. req.body라 하면 요청햇던 form에 적힌 데이터 수신 가능
 
 /**
  * list 로 GET 요청으로 접속하면
  * 실제 Db에 저장된 데이터들이 들어이는 HTML을 보여줌
  */
 
-app.get("/list", (요청, 응답) => {
+app.get("/list", (req, res) => {
   //db에 저장된 collection 안의 모든 데이터를 꺼내렴
   db.collection("test")
     .find()
-    .toArray((에러, 결과) => {
-      console.log(결과);
-      응답.render("list.ejs", { 데이터들: 결과 });
+    .toArray((err, result) => {
+      console.log(result);
+      res.render("list.ejs", { datas: result });
     });
 });
 
-app.get("/detail/:id", (요청, 응답) => {
-  요청.params.id = parseInt(요청.params.id);
-  db.collection("test").findOne({ _id: 요청.params.id }, (에러, 결과) => {
-    console.log(결과);
-    응답.render("detail.ejs", { data: 결과 });
+app.get("/detail/:id", (req, res) => {
+  req.params.id = parseInt(req.params.id);
+  db.collection("test").findOne({ _id: req.params.id }, (err, result) => {
+    console.log(result);
+    res.render("detail.ejs", { data: result });
   });
 });
 
-app.get("/edit/:id", (요청, 응답) => {
-  요청.params.id = parseInt(요청.params.id);
-  db.collection("test").findOne({ _id: 요청.params.id }, (에러, 결과) => {
-    console.log(결과);
-    응답.render("edit.ejs", { edit: 결과 });
+app.get("/edit/:id", (req, res) => {
+  req.params.id = parseInt(req.params.id);
+  db.collection("test").findOne({ _id: req.params.id }, (err, result) => {
+    console.log(result);
+    res.render("edit.ejs", { edit: result });
   });
 });
 
-app.put("/edit", (요청, 응답) => {
+app.put("/edit", (req, res) => {
   db.collection("test").updateOne(
-    { _id: parseInt(요청.body.id) },
-    { $set: { 할일: 요청.body.title, 날짜: 요청.body.date } },
-    (에러, 결과) => {
+    { _id: parseInt(req.body.id) },
+    { $set: { 할일: req.body.title, 날짜: req.body.date } },
+    (err, result) => {
       console.log("수정완료");
-      응답.redirect("/list");
+      res.redirect("/list");
     }
   );
 });
@@ -102,12 +96,12 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/login", (요청, 응답) => {
-  응답.render("login.ejs");
+app.get("/login", (req, res) => {
+  res.render("login.ejs");
 });
 
-app.get("/fail", (요청, 응답) => {
-  응답.render("fail.ejs");
+app.get("/fail", (req, res) => {
+  res.render("fail.ejs");
 });
 
 app.post(
@@ -115,8 +109,9 @@ app.post(
   passport.authenticate("local", {
     failureRedirect: "/fail",
   }),
-  (요청, 응답) => {
-    응답.redirect("/");
+  (req, res) => {
+    res.json(req.user);
+    console.log(req.user);
   }
 );
 
@@ -128,22 +123,19 @@ passport.use(
       session: true,
       passReqToCallback: false,
     },
-    function (입력한아이디, 입력한비번, done) {
+    function (id, pw, done) {
       //console.log(입력한아이디, 입력한비번);
-      db.collection("login").findOne(
-        { id: 입력한아이디 },
-        function (에러, 결과) {
-          if (에러) return done(에러);
+      db.collection("login").findOne({ id: id }, function (err, result) {
+        if (err) return done(err);
 
-          if (!결과)
-            return done(null, false, { message: "존재하지않는 아이디요" });
-          if (입력한비번 == 결과.pw) {
-            return done(null, 결과);
-          } else {
-            return done(null, false, { message: "비번틀렸어요" });
-          }
+        if (!result)
+          return done(null, false, { message: "존재하지않는 아이디요" });
+        if (pw == result.pw) {
+          return done(null, result);
+        } else {
+          return done(null, false, { message: "비번틀렸어요" });
         }
-      );
+      });
     }
   )
 );
@@ -154,106 +146,115 @@ passport.serializeUser((user, done) => {
 });
 
 // 로그인 시 개인정보를 db에서 찾는 역할
-passport.deserializeUser((아이디, done) => {
-  db.collection("login").findOne({ id: 아이디 }, (에러, 결과) => {
-    done(null, 결과);
+passport.deserializeUser((id, done) => {
+  db.collection("login").findOne({ id: id }, (err, result) => {
+    done(null, result);
   });
 });
 
-function loginCheck(요청, 응답, next) {
-  if (요청.user) {
+function loginCheck(req, res, next) {
+  if (req.user) {
     next();
   } else {
-    응답.send("로그인 안됨");
+    res.send("로그인 안됨");
   }
 }
 
-app.post("/chatroom", loginCheck, (요청, 응답) => {
-  let 저장할거 = {
-    title: "무슨무슨채팅방",
-    member: [ObjectId(요청.body.당한사람id), 요청.user._id],
+app.post("/chatroom", loginCheck, (req, res) => {
+  let saveData = {
+    title: "chatroom",
+    member: [ObjectId(req.body.targetId), req.user._id],
     date: new Date(),
   };
   db.collection("chatroom")
-    .insertOne(저장할거)
-    .then((결과) => {
-      응답.send("성공");
+    .insertOne(saveData)
+    .then((result) => {
+      res.send("성공");
     })
     .catch((error) => {});
 });
 
-app.get("/chat", loginCheck, (요청, 응답) => {
+app.get("/chat", loginCheck, (req, res) => {
   db.collection("chatroom")
-    .find({ member: 요청.user._id })
+    .find({ member: req.user._id })
     .toArray()
-    .then((결과) => {
-      응답.render("chat.ejs", { data: 결과 });
+    .then((result) => {
+      res.render("chat.ejs", { data: result });
     });
 });
 
-app.post("/register", (요청, 응답) => {
+app.post("/register", (req, res) => {
   db.collection("login").insertOne(
-    { id: 요청.body.id, pw: 요청.body.pw },
-    (에러, 결과) => {
-      응답.redirect("/");
+    { id: req.body.id, pw: req.body.pw },
+    (err, result) => {
+      res.redirect("/");
     }
   );
 });
 
-app.post("/message", loginCheck, (요청, 응답) => {
-  let 저장할거 = {
-    parent: 요청.body.parent,
-    content: 요청.body.content,
-    userid: 요청.user._id,
+app.post("/message", loginCheck, (req, res) => {
+  let saveData = {
+    parent: req.body.parent,
+    content: req.body.content,
+    userid: req.user._id,
     date: new Date(),
   };
   db.collection("message")
-    .insertOne(저장할거)
+    .insertOne(saveData)
     .then(() => {
       console.log("db저장성공");
-      응답.send("db저장성공");
+      res.send("db저장성공");
     })
     .catch(() => {
       console.log("실패");
     });
 });
 
-app.get("/message/:parentid", loginCheck, function (요청, 응답) {
-  응답.writeHead(200, {
+app.get("/message/:parentid", loginCheck, function (req, res) {
+  res.writeHead(200, {
     Connection: "keep-alive",
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
   });
   db.collection("message")
-    .find({ parent: 요청.params.id })
+    .find({ parent: req.params.parentid })
     .toArray()
-    .then((결과) => {
-      응답.write("event: test\n");
-      응답.write(`data: ${JSON.stringify(결과)} + \n\n`);
+    .then((result) => {
+      res.write("event: test\n");
+      res.write(`data: ${JSON.stringify(result)}\n\n`);
     });
+
+  const pipeline = [{ $match: { "fullDocument.parent": req.params.parentid } }];
+
+  const collection = db.collection("message");
+  const changeStream = collection.watch(pipeline);
+  changeStream.on("change", (result) => {
+    res.write("event: test\n");
+    res.write(`data: ${JSON.stringify([result.fullDocument])}\n\n`);
+  });
 });
 
-app.post("/add", (요청, 응답) => {
-  요청.user._id;
-  응답.render("write.ejs");
-  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
-    console.log(결과.totalPost);
-    let 총게시물갯수 = 결과.totalPost;
-    let 저장할거 = {
-      할일: 요청.body.title,
-      날짜: 요청.body.date,
-      _id: 총게시물갯수 + 1,
-      작성자: 요청.user._id,
+app.post("/add", (req, res) => {
+  req.user._id;
+  res.render("write.ejs");
+  db.collection("counter").findOne({ name: "게시물갯수" }, (err, result) => {
+    console.log(result.totalPost);
+    let totalPost = result.totalPost;
+    let saveData = {
+      할일: req.body.title,
+      날짜: req.body.date,
+      _id: totalPost + 1,
+      작성자: req.user._id,
     };
-    db.collection("test").insertOne(저장할거, (에러, 결과) => {
+    db.collection("test").insertOne(saveData, (err, result) => {
       console.log("저장완료");
       //counter 라는 콜렉션에 있는 totalpost 라는 항목도 1 증가 시켜야함;
       db.collection("counter").updateOne(
         { name: "게시물갯수" },
         { $inc: { totalPost: 1 } },
-        (에러, 결과) => {
-          if (에러) {
-            return console.log(에러 + 입니다);
+        (err, result) => {
+          if (err) {
+            return console.log(err + 입니다);
           }
         }
       );
@@ -261,21 +262,21 @@ app.post("/add", (요청, 응답) => {
   });
 });
 
-app.delete("/delete", (요청, 응답) => {
+app.delete("/delete", (req, res) => {
   console.log("삭제요청 들어옴");
-  console.log(요청.body);
-  요청.body._id = parseInt(요청.body._id);
-  let 삭제할데이터 = { _id: 요청.body._id, 작성자: 요청.user.id };
-  db.collection("counter").findOne({ name: "게시물갯수" }, (에러, 결과) => {
-    db.collection("test").deleteOne(삭제할데이터, (에러, 결과) => {
+  console.log(req.body);
+  req.body._id = parseInt(req.body._id);
+  let deleteData = { _id: req.body._id, 작성자: req.user._id };
+  db.collection("counter").findOne({ name: "게시물갯수" }, (err, result) => {
+    db.collection("test").deleteOne(deleteData, (err, result) => {
       console.log("삭제완료");
-      응답.status(200).send({ message: "성공했습니다" });
+      res.status(200).send({ message: "성공했습니다" });
       db.collection("counter").updateOne(
         { name: "게시물갯수" },
         { $inc: { totalPost: -1 } },
-        (에러, 결과) => {
-          if (에러) {
-            return console.log(에러 + 입니다);
+        (err, result) => {
+          if (err) {
+            return console.log(err + 입니다);
           }
         }
       );
@@ -283,28 +284,28 @@ app.delete("/delete", (요청, 응답) => {
   });
 });
 
-app.get("/mypage", loginCheck, (요청, 응답) => {
-  console.log(요청.user);
-  응답.render("mypage.ejs", { 사용자: 요청.user });
+app.get("/mypage", loginCheck, (req, res) => {
+  console.log(req.user);
+  res.render("mypage.ejs", { 사용자: req.user });
 });
 
-app.get("/search", (요청, 응답) => {
-  console.log(요청.query.value);
+app.get("/search", (req, res) => {
+  console.log(req.query.value);
   db.collection("test")
     .aggregate([
       {
         $search: {
           index: "titleSearch",
           text: {
-            query: 요청.query.value,
+            query: req.query.value,
             path: "할일",
           },
         },
       },
     ])
-    .toArray((에러, 결과) => {
-      console.log(결과);
-      응답.render("search.ejs", { 데이터들: 결과 });
+    .toArray((err, result) => {
+      console.log(result);
+      res.render("search.ejs", { datas: result });
     });
 });
 
@@ -334,14 +335,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.get("/upload", (요청, 응답) => {
-  응답.render("upload.ejs");
+app.get("/upload", (req, res) => {
+  res.render("upload.ejs");
 });
 
-app.post("/upload", upload.single("file"), (요청, 응답) => {
-  응답.send("업로드 완료");
+app.post("/upload", upload.single("file"), (req, res) => {
+  res.send("업로드 완료");
 });
 
-app.get("/image/:img", (요청, 응답) => {
-  응답.sendFile(__dirname + "/public/image/" + 요청.params.img);
+app.get("/image/:img", (req, res) => {
+  res.sendFile(__dirname + "/public/image/" + req.params.img);
 });
