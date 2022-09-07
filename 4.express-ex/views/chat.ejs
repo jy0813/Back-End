@@ -20,6 +20,7 @@
         height: 450px;
         overflow-y: scroll;
         padding: 10px;
+        background: skyblue;
       }
       .chat-content li {
         margin-top: 10px;
@@ -31,13 +32,15 @@
         margin-bottom: 0;
       }
       .chat-box {
-        background: #eee;
+        background: #fff;
         padding: 5px;
         border-radius: 5px;
         float: left;
       }
       .mine {
         float: right;
+        background: rgb(255, 255, 9);
+        color: rgb(97, 75, 4);
       }
     </style>
     <title>Hello, world!</title>
@@ -76,36 +79,44 @@
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script>
-      let 지금누른채팅방id;
+      let targetId;
       let eventSource;
       $(".list-group-item").click(function () {
         $(this).css("background-color", "#eee");
-        지금누른채팅방id = this.dataset.id;
+        targetId = this.dataset.id;
         $(".chat-content").html("");
 
         if (eventSource != undefined) {
           eventSource.close();
         }
 
-        eventSource = new EventSource("/message/" + 지금누른채팅방id);
+        eventSource = new EventSource("/message/" + targetId);
         eventSource.addEventListener("test", (e) => {
-          let 가져온거 = JSON.parse(e.data);
+          let pull = JSON.parse(e.data);
+          let loginId = localStorage.getItem("id");
           console.log(JSON.parse(e.data));
-          가져온거.forEach((i) => {
-            $(".chat-content").append(
-              `<li><span class="chat-box">${i.content}</span></li>`
-            );
+
+          pull.forEach((i) => {
+            if (i.userid === loginId) {
+              $(".chat-content").append(
+                `<li><span class="chat-box mine">${i.content}</span></li>`
+              );
+            } else {
+              $(".chat-content").append(
+                `<li><span class="chat-box">${i.content}</span></li>`
+              );
+            }
           });
         });
       });
 
       $("#send").click(function () {
-        let 채팅내용 = $("#chat-input").val();
-        let 보낼거 = {
-          parent: 지금누른채팅방id,
-          content: 채팅내용,
+        let inputVal = $("#chat-input").val();
+        let sendData = {
+          parent: targetId,
+          content: inputVal,
         };
-        $.post("/message", 보낼거).then(() => {
+        $.post("/message", sendData).then(() => {
           console.log(전송성공);
         });
       });
