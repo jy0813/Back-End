@@ -3,6 +3,9 @@ const app = express();
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const { ObjectId } = require("mongodb");
+const http = require("http").createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http);
 require("dotenv").config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -20,7 +23,7 @@ MongoClient.connect(
 
     db = client.db("todo");
 
-    app.listen(process.env.PORT, () => {
+    http.listen(process.env.PORT, () => {
       console.log("listening on 5000");
     });
   }
@@ -313,6 +316,7 @@ app.use("/shop", require("./routes/shop.js"));
 app.use("/board/sub", require("./routes/bode.js"));
 
 let multer = require("multer");
+const { log } = require("console");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./public/image");
@@ -344,4 +348,16 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
 app.get("/image/:img", (req, res) => {
   res.sendFile(__dirname + "/public/image/" + req.params.img);
+});
+
+app.get("/socket", (req, res) => {
+  res.render("socket.ejs");
+});
+
+io.on("connection", (socket) => {
+  console.log("유저접속됨");
+
+  socket.on("user-send", (data) => {
+    console.log(data);
+  });
 });
