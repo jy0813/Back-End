@@ -17,15 +17,38 @@
     <%- include('nav.html') %>
 
     <div>채팅방</div>
+    <input id="input1" />
     <button id="send">서버에 메시지 보내기</button>
+    <div id="content"></div>
+
+    <div class="mt-4">
+      <button id="room1">채팅방1 입장</button>
+      <button id="room1-send">채팅방1에 메세지 전송</button>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.2/socket.io.js"></script>
     <script>
       const socket = io();
       const $btn = document.querySelector("#send");
+      const $input = document.querySelector("#input1");
+      const $content = document.querySelector("#content");
+      const $room1 = document.querySelector("#room1");
+      const $roomSend = document.querySelector("#room1-send");
       $btn.addEventListener("click", () => {
-        socket.emit("user-send", "서버에 전달");
+        socket.emit("user-send", $input.value);
+
+        socket.on("broadcast", (data) => {
+          $content.append(data);
+        });
+      });
+
+      $room1.addEventListener("click", () => {
+        socket.emit("joinroom", "입장시도");
+      });
+
+      $roomSend.addEventListener("click", () => {
+        socket.emit("room1-send", "채팅방1에 접속하였습니다.");
       });
     </script>
     <script

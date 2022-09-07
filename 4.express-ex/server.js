@@ -356,8 +356,21 @@ app.get("/socket", (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("유저접속됨");
+  console.log(socket.id);
+
+  socket.on("room1-send", (data) => {
+    io.to("room1").emit("broadcast", data);
+  });
+
+  socket.on("joinroom", (data) => {
+    socket.join("room1");
+  });
 
   socket.on("user-send", (data) => {
     console.log(data);
+    //모든 유저에게 보내줌
+    io.emit("broadcast", data);
+    //서버 유저 1명간 소통
+    //io.to(socket.id).emit("broadcast", data);
   });
 });
